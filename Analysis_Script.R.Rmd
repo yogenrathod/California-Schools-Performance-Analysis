@@ -1,0 +1,120 @@
+---
+title: "Introduction to FinTech Assignment"
+author: "Yogen Rathod"
+date: "May 5, 2026"
+output: html_document
+---
+
+**To Course Instructor:** Dr. Colin M. Wasiloff  
+**From:** Yogen Rathod, Statistician  
+**Subject:** Introduction to FinTech Assignment Using R  
+
+This report replicates the four foundational sessions of financial analysis and time series forecasting using Microsoft Corporation (MSFT) stock data.
+
+***
+
+## Session 1: Introduction to Financial Analysis Using R
+
+In this session, financial data for the selected stock is imported using the quantmod package and visualized over the selected timeframe.
+
+```{r session1, message=FALSE, warning=FALSE}
+library(quantmod)
+
+getSymbols("MSFT", src = "yahoo",
+           from = "2023-04-01",
+           to = "2024-04-01")
+
+chartSeries(MSFT,
+            theme = chartTheme("white"),
+            name = "MSFT Closing Prices (2023-2024)")
+```
+
+**Interpretation:**  
+The initial analysis establishes the foundational dataset by importing Microsoft Corporation (MSFT) stock data. The resulting chart visualizes daily closing prices from April 2023 to April 2024, providing a macro-level view of historical performance, growth trends, and price fluctuations over the selected one-year period.
+
+***
+
+## Session 2: Manipulating and Analyzing Financial Time Series
+
+This section calculates daily and monthly returns to analyze percentage changes in stock performance.
+
+```{r session2, message=FALSE, warning=FALSE}
+MSFT_daily_returns <- dailyReturn(MSFT)
+
+MSFT_monthly_returns <- monthlyReturn(MSFT)
+
+barChart(MSFT_daily_returns,
+         theme = chartTheme("black", grid.col = "gray"),
+         name = "Daily Returns for MSFT")
+
+barChart(MSFT_monthly_returns,
+         theme = chartTheme("white"),
+         name = "Monthly Returns for MSFT")
+```
+
+**Interpretation:**  
+This section transitions from absolute price analysis to relative performance metrics by calculating daily and monthly returns. The bar charts highlight percentage changes between consecutive periods, allowing identification of volatility clusters and periods of significant positive or negative market momentum.
+
+***
+
+## Session 3: Basic Financial Calculations
+
+Technical indicators are applied to evaluate market trends, volatility, and momentum.
+
+```{r session3, message=FALSE, warning=FALSE}
+chartSeries(MSFT,
+            TA = "addVo();addSMA(20)",
+            theme = chartTheme("white"),
+            name = "MSFT with 20-Day SMA")
+
+MSFT_volatility <- runSD(MSFT_daily_returns, n = 20)
+
+plot(MSFT_volatility,
+     main = "20-Day Rolling Volatility of MSFT")
+
+MSFT_macd_vals <- MACD(Cl(MSFT))
+
+MSFT_rsi_vals <- RSI(Cl(MSFT))
+
+plot(MSFT_macd_vals,
+     main = "MACD for MSFT")
+
+plot(MSFT_rsi_vals,
+     main = "RSI for MSFT")
+
+chartSeries(MSFT,
+            TA = "addVo();addMACD();addRSI();addSMA(20)",
+            theme = chartTheme("white"),
+            name = "MSFT Comprehensive Technical Analysis")
+```
+
+**Interpretation:**  
+The third session applies technical indicators to assess risk and market momentum. The 20-day Simple Moving Average smooths short-term fluctuations and reveals the underlying trend. The rolling volatility chart quantifies market risk by measuring the standard deviation of returns. Additionally, MACD and RSI provide insight into trend strength and potential overbought or oversold market conditions.
+
+***
+
+## Session 4: Time Series Forecasting
+
+An ARIMA forecasting model is developed to predict future stock prices.
+
+```{r session4, message=FALSE, warning=FALSE}
+library(forecast)
+
+plot(MSFT$MSFT.Open,
+     main = "MSFT Open Price without Forecasting")
+
+MSFT_OPfit <- auto.arima(MSFT$MSFT.Open)
+
+summary(MSFT_OPfit)
+
+checkresiduals(MSFT_OPfit)
+
+MSFT_OP_future_values <- forecast(MSFT_OPfit,
+                                  h = 20)
+
+plot(MSFT_OP_future_values,
+     main = "MSFT Open Price Forecast (Next 20 Days)")
+```
+
+**Interpretation:**  
+The final session utilizes an ARIMA model to forecast Microsoft’s opening stock price over the next 20 trading periods. The forecast line represents the most probable future price movement based on historical patterns, while the confidence intervals reflect increasing uncertainty over time. Residual diagnostics help validate that the model has successfully captured the underlying structure of the time series.
